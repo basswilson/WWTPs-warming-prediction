@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Jan 29 08:57:47 2021
-
-@author: Xiaonan Liu
-"""
-
 # Import packages
 import os
 import random
@@ -263,3 +256,4 @@ for col in range(1,1625):
             pth_name = str(col) + 'col-4fold-seed'+ str(seed) +'-10000ep-78bS-0.00001lr-'+ str(wd) +'wd-drop'+ str(drop_P) +'_train_network.pth'
             torch.save(Net, pth_name)    #保存训练好的网络            
 print('Finished the training process!')
+
