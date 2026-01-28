@@ -11,7 +11,7 @@ from sklearn.metrics import r2_score, mean_squared_error
 # 封装种子设置函数
 def seed_torch(seed=0):
     random.seed(seed)
-    os.environ['PYTHONHASHSEED'] = str(seed)  # 为了禁止hash随机化，使得实验可复现
+    os.environ['PYTHONHASHSEED'] = str(seed)  
     np.random.seed(seed)
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
@@ -93,11 +93,11 @@ class MyDataset(Dataset):
         return self.length
 
     def __getitem__(self, idx):
-        return self.features[idx], self.targets[idx], self.indices[idx]  # 返回特征、目标和原始索引
+        return self.features[idx], self.targets[idx], self.indices[idx]  
 
 def get_testdata(col=1):
     data = MyDataset(col)
-    return data.features, data.targets, data.indices  # 返回特征、目标和索引
+    return data.features, data.targets, data.indices  
 
 
 os.chdir('/home/hongchang/Documents/WS-Pytorch/WWTPs_Tem_DIS_(Final)/results/Before Perturbed/alpha/')  # change direction.
