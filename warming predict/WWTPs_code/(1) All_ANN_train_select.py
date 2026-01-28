@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 
 #os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
-# Building model 指定随机种子
+# Building model 
 def seed_torch(seed=0):
 	random.seed(seed)
 	os.environ['PYTHONHASHSEED'] = str(seed)
@@ -25,7 +25,7 @@ def seed_torch(seed=0):
 
 class Linear_ANN(nn.Module):
     """
-        Layer of our ANN. 定义一个全连接层
+        Layer of our ANN. 
     """
     def __init__(self, input_features, output_features, prior_var=1.):
         """
@@ -54,33 +54,32 @@ class Neural3network(nn.Module):
         super(Neural3network, self).__init__()
         
         # define network layers
-        self.layer1 = Linear_ANN(in_dim, n_hidden_1) #定义第一层线性网络
-        self.layer2 = Linear_ANN(n_hidden_1, out_dim) #定义第二层线性网络
+        self.layer1 = Linear_ANN(in_dim, n_hidden_1) 
+        self.layer2 = Linear_ANN(n_hidden_1, out_dim) 
         
-        self.dropout = nn.Dropout(p)  # dropout训练
+        self.dropout = nn.Dropout(p)  
 
     def forward(self, x):
         # define forward pass
-        x = x.view(x.size(0), -1) #把矩阵转为一维张量
-        x = self.dropout(self.layer1(x))  #第一层线性层，dropout随机丢掉神经元
-        x = func.relu(x)       #指定第一层的激活函数为relu
-        x = torch.sigmoid(self.layer2(x))  #指定第二层的激活函数为sigmiod。
+        x = x.view(x.size(0), -1) 
+        x = self.dropout(self.layer1(x))  
+        x = func.relu(x)       
+        x = torch.sigmoid(self.layer2(x)) 
         return x
 
 #Read data
 class MyDataset(Dataset):
     """
-    定义pytorch里的dataset类
     """
     def __init__(self, col=1):
         data1 = np.loadtxt('/home/hongchang/Documents/WS-Pytorch/WWTPs_Tem_DIS_(Final)/污水厂数据集/4.csv',delimiter=',',skiprows=1,usecols=range(1,85), dtype=np.float32)
         data2 = np.loadtxt('/home/hongchang/Documents/WS-Pytorch/WWTPs_Tem_DIS_(Final)/污水厂数据集/Sample-725带20%属.csv',delimiter=',',skiprows=1,usecols=col, dtype=np.float32)
         
         ##Normalization
-        data2_normed = (data2 - data2.min(axis=0) + 1e-12)/(data2.max(axis=0)-data2.min(axis=0) + 1e-12)  #对data2进行标准化处理
+        data2_normed = (data2 - data2.min(axis=0) + 1e-12)/(data2.max(axis=0)-data2.min(axis=0) + 1e-12)  
 
         state = np.random.get_state()
-        np.random.shuffle(data1)  #随机打乱数据
+        np.random.shuffle(data1)  
         np.random.set_state(state)
         np.random.shuffle(data2_normed)
 
@@ -244,15 +243,13 @@ for col in range(1,1625):
     for seed in range(0,5):
         for wd in [0.01]:
             drop_P = 0.2
-            #固定种子
             seed_torch(seed)
-            #加载训练数据
             mydata = MyDataset(col)
             filename = str(col) + 'col-4fold-seed'+ str(seed) +'-10000ep-78bS-0.00001lr-'+ str(wd) +'wd-drop'+ str(drop_P)+'.txt'
             infor_file = open(filename, 'w+')
-            #K交叉验证
             Net, Set = k_fold(infor_file,4,mydata,seed,drop_P,10000,78,0.00001,wd)
             infor_file.close()
             pth_name = str(col) + 'col-4fold-seed'+ str(seed) +'-10000ep-78bS-0.00001lr-'+ str(wd) +'wd-drop'+ str(drop_P) +'_train_network.pth'
-            torch.save(Net, pth_name)    #保存训练好的网络            
+            torch.save(Net, pth_name)              
 print('Finished the training process!')
+
