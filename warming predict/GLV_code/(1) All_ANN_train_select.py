@@ -24,9 +24,6 @@ def seed_torch(seed=0):
 	torch.backends.cudnn.deterministic = True
 
 class Linear_ANN(nn.Module):
-    """
-        Layer of our ANN. 定义一个全连接层
-    """
     def __init__(self, input_features, output_features, prior_var=1.):
         """
             Initialization of our layer : our prior is a normal distribution
@@ -76,10 +73,10 @@ class MyDataset(Dataset):
         data1 = np.loadtxt('/home/hongchang/Documents/WS-Pytorch/WWTPs_Tem_DIS_(Final)/GLV 数据集/E.csv',delimiter=',',skiprows=1,usecols=range(1,9), dtype=np.float32)
         data2 = np.loadtxt('/home/hongchang/Documents/WS-Pytorch/WWTPs_Tem_DIS_(Final)/GLV 数据集/人工数据集.csv',delimiter=',',skiprows=1,usecols=col, dtype=np.float32)
         ##Normalization
-        data2_normed = (data2 - data2.min(axis=0) + 1e-12)/(data2.max(axis=0)-data2.min(axis=0) + 1e-12)  #对data2进行标准化处理
+        data2_normed = (data2 - data2.min(axis=0) + 1e-12)/(data2.max(axis=0)-data2.min(axis=0) + 1e-12) 
 
         state = np.random.get_state()
-        np.random.shuffle(data1)  #随机打乱数据
+        np.random.shuffle(data1)  
         np.random.set_state(state)
         np.random.shuffle(data2_normed)
 
@@ -243,15 +240,16 @@ for col in range(1,101):
     for seed in range(0,5):
         for wd in [0.01]:
             drop_P = 0.2
-            #固定种子
+        
             seed_torch(seed)
-            #加载训练数据
+   
             mydata = MyDataset(col)
             filename = str(col) + 'col-4fold-seed'+ str(seed) +'-10000ep-78bS-0.00001lr-'+ str(wd) +'wd-drop'+ str(drop_P)+'.txt'
             infor_file = open(filename, 'w+')
-            #K交叉验证
+    
             Net, Set = k_fold(infor_file,4,mydata,seed,drop_P,10000,78,0.00001,wd)
             infor_file.close()
             pth_name = str(col) + 'col-4fold-seed'+ str(seed) +'-10000ep-78bS-0.00001lr-'+ str(wd) +'wd-drop'+ str(drop_P) +'_train_network.pth'
-            torch.save(Net, pth_name)    #保存训练好的网络            
+            torch.save(Net, pth_name)     
 print('Finished the training process!')
+
