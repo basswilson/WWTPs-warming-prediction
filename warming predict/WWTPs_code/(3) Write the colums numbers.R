@@ -9,8 +9,6 @@ target = "After"
 # Before
 path <- paste0("/home/hongchang/Documents/WS-Pytorch/WWTPs_Tem_DIS_(Final)/results/", target, " Perturbed/alpha/analysis")
 setwd(path)
-
-# 定义4.csv的列名（共84个特征列）
 features_colnames <- c("Latitude", "Longitude", 
                        "Country.RegionAustralia", "Country.RegionAustria", 
                        "Country.RegionBrazil", "Country.RegionCada", 
@@ -50,13 +48,11 @@ features_colnames <- c("Latitude", "Longitude",
                        "Industrial.Percentage", "MLSS", "DO", "pH", 
                        "Mixed.liquid.temperature..oC.")
 
-# 定义Test_log文件的列名（总列数91）
 log_colnames <- c("Index", 
                   "Column", "Seed", "Weight_Decay", "Dropout_Probability", 
                   features_colnames, 
                   "Target", "Predicted")
 
-# 定义Test_and_parameters文件的列名（总列数91）
 para_colnames <- c("Column", "Seed", "Weight_Decay", "Dropout_Probability",
                    "MSE_Test", "R2_Test",
                    paste0("RI_", 1:84), 
@@ -64,7 +60,6 @@ para_colnames <- c("Column", "Seed", "Weight_Decay", "Dropout_Probability",
 
 path1 <- paste0("Test_",target,".txt")
 path2 <- paste0("Test_and_parameters_",target,".csv")
-# 读取数据文件
 test_log <- read_delim(path1,
                        delim = "\t", 
                        col_names = log_colnames)
@@ -72,23 +67,20 @@ test_log <- read_delim(path1,
 test_para <- read_csv(path2,
                       col_names = para_colnames)
 
-# 验证列数是否正确
 cat("Test_log列数验证:", ncol(test_log) == 91, "\n")
 cat("Test_parameters列数验证:", ncol(test_para) == 91, "\n")
 
-# 查看数据结构
 glimpse(test_log)
 glimpse(test_para)
 
 
 
-# 查看RI
 b <- as.data.frame(colMeans(test_para[,7:90]))
 rownames(b) <- features_colnames
 
 path3 <- paste0( "Test_",target,"_with_headers.csv")
 path4 <- paste0("Test_and_parameters_",target,"_with_headers.csv")
-# 保存带列名的文件
+
 write_csv(test_log, 
           path3)
 
