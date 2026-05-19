@@ -84,7 +84,7 @@ class MyDataset(Dataset):
         np.random.shuffle(indices)  
 
         self.features = torch.from_numpy(data1)
-        self.targets = torch.reshape(torch.from_numpy(data2_normed), (725, 1))
+        self.targets = torch.reshape(torch.from_numpy(data2_normed), (182, 1))
         self.length = data1.shape[0]
         self.indices = torch.from_numpy(indices) 
 
