@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 
 #os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 
-# Building model 指定随机种子
+
 def seed_torch(seed=0):
 	random.seed(seed)
 	os.environ['PYTHONHASHSEED'] = str(seed)
@@ -51,27 +51,24 @@ class Neural3network(nn.Module):
         super(Neural3network, self).__init__()
         
         # define network layers
-        self.layer1 = Linear_ANN(in_dim, n_hidden_1) #定义第一层线性网络
-        self.layer2 = Linear_ANN(n_hidden_1, out_dim) #定义第二层线性网络
+        self.layer1 = Linear_ANN(in_dim, n_hidden_1) 
+        self.layer2 = Linear_ANN(n_hidden_1, out_dim)
         
-        self.dropout = nn.Dropout(p)  # dropout训练
+        self.dropout = nn.Dropout(p) 
 
     def forward(self, x):
         # define forward pass
-        x = x.view(x.size(0), -1) #把矩阵转为一维张量
-        x = self.dropout(self.layer1(x))  #第一层线性层，dropout随机丢掉神经元
-        x = func.relu(x)       #指定第一层的激活函数为relu
-        x = torch.sigmoid(self.layer2(x))  #指定第二层的激活函数为sigmiod。
+        x = x.view(x.size(0), -1) 
+        x = self.dropout(self.layer1(x))  
+        x = func.relu(x)      
+        x = torch.sigmoid(self.layer2(x))
         return x
 
 #Read data
 class MyDataset(Dataset):
-    """
-    定义pytorch里的dataset类
-    """
     def __init__(self, col=1):
-        data1 = np.loadtxt('/home/hongchang/Documents/WS-Pytorch/WWTPs_Tem_DIS_(Final)/GLV 数据集/E.csv',delimiter=',',skiprows=1,usecols=range(1,9), dtype=np.float32)
-        data2 = np.loadtxt('/home/hongchang/Documents/WS-Pytorch/WWTPs_Tem_DIS_(Final)/GLV 数据集/人工数据集.csv',delimiter=',',skiprows=1,usecols=col, dtype=np.float32)
+        data1 = np.loadtxt('/home/hongchang/Documents/WS-Pytorch/WWTPs_Tem_DIS_(Final)/GLV/E.csv',delimiter=',',skiprows=1,usecols=range(1,9), dtype=np.float32)
+        data2 = np.loadtxt('/home/hongchang/Documents/WS-Pytorch/WWTPs_Tem_DIS_(Final)/GLV/GLV.csv',delimiter=',',skiprows=1,usecols=col, dtype=np.float32)
         ##Normalization
         data2_normed = (data2 - data2.min(axis=0) + 1e-12)/(data2.max(axis=0)-data2.min(axis=0) + 1e-12) 
 
@@ -227,7 +224,6 @@ def k_fold(infor_file, k, mydata, seed, drop, num_epochs = 100, batch_size = 78,
         tra_acc_sum += np.array(train_R2)
         val_acc_sum += np.array(val_R2)
         
-    print('\n', '#'*k,'最终4折交叉验证结果','#'*k,file=infor_file) 
     print('average train loss:{:.4f}, average train accuracy:{:.3f}'.format(train_loss_sum/k, train_acc_sum/k),file=infor_file)
     print('average valid loss:{:.4f}, average valid accuracy:{:.3f}'.format(valid_loss_sum/k, valid_acc_sum/k),file=infor_file)
     
