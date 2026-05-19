@@ -72,8 +72,8 @@ class MyDataset(Dataset):
     """
     """
     def __init__(self, col=1):
-        data1 = np.loadtxt('/home/hongchang/Documents/WS-Pytorch/WWTPs_Tem_DIS_(Final)/污水厂数据集/4.csv',delimiter=',',skiprows=1,usecols=range(1,85), dtype=np.float32)
-        data2 = np.loadtxt('/home/hongchang/Documents/WS-Pytorch/WWTPs_Tem_DIS_(Final)/污水厂数据集/Sample-725带20%属.csv',delimiter=',',skiprows=1,usecols=col, dtype=np.float32)
+        data1 = np.loadtxt('/home/hongchang/Documents/WS-Pytorch/WWTPs_Tem_DIS_(Final)/WWTPS/metadata.csv',delimiter=',',skiprows=1,usecols=range(1,85), dtype=np.float32)
+        data2 = np.loadtxt('/home/hongchang/Documents/WS-Pytorch/WWTPs_Tem_DIS_(Final)/WWTPS/Sample.csv',delimiter=',',skiprows=1,usecols=col, dtype=np.float32)
         
         ##Normalization
         data2_normed = (data2 - data2.min(axis=0) + 1e-12)/(data2.max(axis=0)-data2.min(axis=0) + 1e-12)  
