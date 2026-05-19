@@ -8,14 +8,14 @@ import numpy as np
 from sklearn.metrics import r2_score, mean_squared_error
 
 
-# 封装种子设置函数
+
 def seed_torch(seed=0):
     random.seed(seed)
     os.environ['PYTHONHASHSEED'] = str(seed)  
     np.random.seed(seed)
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)  # if you are using multi-GPU.
+    torch.cuda.manual_seed_all(seed)  
     torch.backends.cudnn.benchmark = False
     torch.backends.cudnn.deterministic = True
 
@@ -70,24 +70,24 @@ class Neural3network(nn.Module):
 
 class MyDataset(Dataset):
     def __init__(self, col=1):
-        data1 = np.loadtxt('/home/hongchang/Documents/WS-Pytorch/WWTPs_Tem_DIS_(Final)/污水厂数据集/扰动后.csv', delimiter=',', skiprows=1,
+        data1 = np.loadtxt('/home/hongchang/Documents/WS-Pytorch/WWTPs_Tem_DIS_(Final)/WWTP/扰动后.csv', delimiter=',', skiprows=1,
                            usecols=range(1, 85), dtype=np.float32)
 
-        data2 = np.loadtxt('/home/hongchang/Documents/WS-Pytorch/WWTPs_Tem_DIS_(Final)/污水厂数据集/genus_725.csv', delimiter=',',
+        data2 = np.loadtxt('/home/hongchang/Documents/WS-Pytorch/WWTPs_Tem_DIS_(Final)/WWTP/Sample.csv', delimiter=',',
                            skiprows=1, usecols=col, dtype=np.float32)
         data2_normed = (data2 - data2.min(axis=0) + 1e-12) / (data2.max(axis=0) - data2.min(axis=0) + 1e-12)
 
         state = np.random.get_state()
-        indices = np.arange(data1.shape[0])  # 保存原始索引
+        indices = np.arange(data1.shape[0]) 
         np.random.shuffle(data1)
         np.random.set_state(state)
         np.random.shuffle(data2_normed)
-        np.random.shuffle(indices)  # 与数据同步打乱索引
+        np.random.shuffle(indices)  
 
         self.features = torch.from_numpy(data1)
-        self.targets = torch.reshape(torch.from_numpy(data2_normed), (725, 1))
+        self.targets = torch.reshape(torch.from_numpy(data2_normed), (543, 1))
         self.length = data1.shape[0]
-        self.indices = torch.from_numpy(indices)  # 将索引保存为属性
+        self.indices = torch.from_numpy(indices) 
 
     def __len__(self):
         return self.length
@@ -100,7 +100,7 @@ def get_testdata(col=1):
     return data.features, data.targets, data.indices  
 
 
-os.chdir('/home/hongchang/Documents/WS-Pytorch/WWTPs_Tem_DIS_(Final)/results/Before Perturbed/alpha/')  # change direction.
+os.chdir('/home/hongchang/Documents/WS-Pytorch/WWTPs_Tem_DIS_(Final)/results/Before Perturbed/alpha/')  
 os.getcwd()  # get current work direction.
 
 para = np.ones((0, 91))
@@ -110,42 +110,42 @@ for col in range(1, 1626):
     for seed in range(0, 5):
         drop_P = 0
         wd = 0.01
-        # 加载模型
+
         net = torch.load(
             str(col) + 'col-4fold-seed' + str(seed) + '-10000ep-78bS-0.00001lr-' + str(wd) + 'wd-drop' + str(
                 drop_P) + '_train_network.pth', map_location='cpu')
-        # 计算参数最终的权重(重要性)和偏移量(Garson’s Algorithm)
+  
         weight_H_To_O = np.diag(net.layer2.weight.data.numpy()[-1])
         weight_I_To_H = net.layer1.weight.data.numpy()
         weight_final = np.dot(weight_H_To_O, weight_I_To_H)
         abs_weight_final = abs(weight_final)
-        weightForH = abs_weight_final / abs_weight_final.sum(axis=1, keepdims=True)  ##每行除以行和，得到经过一个隐节点，每个输入节点的相对贡献
-        weightForH[np.isnan(weightForH)] = 0  ##有drop或某些隐节点对输出权重为0时，出现nan
+        weightForH = abs_weight_final / abs_weight_final.sum(axis=1, keepdims=True)  
+        weightForH[np.isnan(weightForH)] = 0  
         Sum_input = weightForH.sum(axis=0)
-        RI = Sum_input / Sum_input.sum()  ##每个节点的相对重要性
+        RI = Sum_input / Sum_input.sum() 
         para_bias = np.dot(net.layer2.weight.data.numpy(), net.layer1.bias.data.numpy()) + net.layer2.bias.data.numpy()
-        # 固定种子
+
         seed_torch(seed)
-        ##加载test数据
-        x_test, y_test, indices = get_testdata(col)  # 获取样本索引
+
+        x_test, y_test, indices = get_testdata(col) 
         test_len = x_test.shape[0]
         col_result = np.ones((test_len, 1)) * col
         seed_result = np.ones((test_len, 1)) * seed
         wd_result = np.ones((test_len, 1)) * wd
         drop_P_result = np.ones((test_len, 1)) * drop_P
-        ##测试模型
+
         net.eval()
         with torch.no_grad():
             Test_pred = net(x_test)
             Test_pred_ = Test_pred.data.numpy()
             y_test_ = y_test.numpy()
             x_test_ = x_test.numpy()
-            # 计算模型测试结果
+
             MSE_T = mean_squared_error(y_test_, Test_pred_, sample_weight=None, multioutput='uniform_average')
             R2_T = r2_score(y_test_, Test_pred_)
 
-        # 整合结果
-        each_test = np.c_[indices, col_result, seed_result, wd_result, drop_P_result, x_test_, y_test_, Test_pred_]  # 包含索引
+
+        each_test = np.c_[indices, col_result, seed_result, wd_result, drop_P_result, x_test_, y_test_, Test_pred_] 
         Test_result = np.r_[Test_result, each_test]
 
         each = np.c_[col, seed, wd, drop_P, MSE_T, R2_T, RI.reshape(1, 84), para_bias]
