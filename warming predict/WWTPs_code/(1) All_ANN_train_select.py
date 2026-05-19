@@ -84,7 +84,7 @@ class MyDataset(Dataset):
         np.random.shuffle(data2_normed)
 
         self.features = torch.from_numpy(data1)
-        self.targets = torch.reshape(torch.from_numpy(data2_normed),(725,1))
+        self.targets = torch.reshape(torch.from_numpy(data2_normed),(543,1))
         self.len = data1.shape[0]
 
     def __len__(self):
