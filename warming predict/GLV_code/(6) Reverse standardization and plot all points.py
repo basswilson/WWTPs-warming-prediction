@@ -50,12 +50,12 @@ class Neural3network(nn.Module):
 
 class MyDataset(Dataset):
     def __init__(self, col=1):
-        data1 = np.loadtxt('/home/hongchang/Documents/WS-Pytorch/WWTPs_Tem_DIS_(Final)/GLV 数据集/E.csv', delimiter=',',
+        data1 = np.loadtxt('/home/hongchang/Documents/WS-Pytorch/WWTPs_Tem_DIS_(Final)/GLV/E.csv', delimiter=',',
                            skiprows=1, usecols=range(1, 9), dtype=np.float32)
         # ENV8 扰动 + 5
         data1[:, 0] += 5
 
-        data2 = np.loadtxt('/home/hongchang/Documents/WS-Pytorch/WWTPs_Tem_DIS_(Final)/GLV 数据集/人工数据集.csv',
+        data2 = np.loadtxt('/home/hongchang/Documents/WS-Pytorch/WWTPs_Tem_DIS_(Final)/GLV/GLV.csv',
                            delimiter=',', skiprows=1, usecols=col, dtype=np.float32)
         self.data2_min = data2.min(axis=0)
         self.data2_max = data2.max(axis=0)
@@ -85,17 +85,17 @@ def get_testdata(col=1):
     return data.features, data.targets, data.indices, data.data2_min, data.data2_max
 
 
-# 初始化结果存储
+
 os.chdir('/home/hongchang/Documents/WS-Pytorch/WWTPs_Tem_DIS_(Final)/results/Before Perturbed/GLV/')
 r2_summary = []
 
-# 所有列合并图准备
+
 all_true_values = []
 all_predicted_values = []
 all_col_labels = []
 
-# 主处理循环
-for col in range(1, 101):  # 你可以根据需要调整列范围
+
+for col in range(1, 101): 
     print(f'\n{"=" * 40}')
     print(f'Processing column {col}')
 
@@ -174,8 +174,7 @@ for col in range(1, 101):  # 你可以根据需要调整列范围
         print(f'  ! No valid data for column {col}')
         r2_summary.append({'Column': col, 'R2_Score': np.nan})
 
-# --- 绘制合并后的图 ---
-# --- 绘制合并后的图，仅显示整体R² ---
+
 if all_true_values:
     plt.figure(figsize=(10, 7))
     plt.scatter(all_true_values, all_predicted_values, alpha=0.6)
@@ -183,10 +182,10 @@ if all_true_values:
     max_val = max(max(all_true_values), max(all_predicted_values))
     plt.plot([min_val, max_val], [min_val, max_val], 'r--')
 
-    # 计算整体 R²
+
     overall_r2 = r2_score(all_true_values, all_predicted_values)
 
-    # 标注整体 R²
+
     plt.text(0.05, 0.95, f'Overall R² = {overall_r2:.3f}',
              transform=plt.gca().transAxes,
              fontsize=12, fontweight='bold',
@@ -200,7 +199,7 @@ if all_true_values:
     plt.savefig(f'{results_dir}All_Columns_Scatter_with_OverallR2.png', dpi=300)
     plt.close()
 
-    # 保存做图数据为CSV（包含Column_Index）
+
     plot_data_df = pd.DataFrame({
         'Column_Index': all_col_labels,
         'True_Values': all_true_values,
