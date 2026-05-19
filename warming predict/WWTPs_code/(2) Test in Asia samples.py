@@ -8,7 +8,7 @@ import numpy as np
 from sklearn.metrics import r2_score, mean_squared_error
 
 
-# 封装种子设置函数
+
 def seed_torch(seed=0):
     random.seed(seed)
     os.environ['PYTHONHASHSEED'] = str(seed)  
@@ -70,9 +70,9 @@ class Neural3network(nn.Module):
 
 class MyDataset(Dataset):
     def __init__(self, col=1):
-        data1 = np.loadtxt('/home/hongchang/Documents/WS-Pytorch/WWTPs_Tem_DIS_(Final)/污水厂数据集/4.csv', delimiter=',', skiprows=1,
+        data1 = np.loadtxt('/home/hongchang/Documents/WS-Pytorch/WWTPs_Tem_DIS_(Final)/污水厂数据集/Asia_metadata.csv', delimiter=',', skiprows=1,
                            usecols=range(1, 85), dtype=np.float32)
-        data2 = np.loadtxt('/home/hongchang/Documents/WS-Pytorch/WWTPs_Tem_DIS_(Final)/污水厂数据集/genus_725.csv', delimiter=',',
+        data2 = np.loadtxt('/home/hongchang/Documents/WS-Pytorch/WWTPs_Tem_DIS_(Final)/污水厂数据集/Asia_samples.csv', delimiter=',',
                            skiprows=1, usecols=col, dtype=np.float32)
         data2_normed = (data2 - data2.min(axis=0) + 1e-12) / (data2.max(axis=0) - data2.min(axis=0) + 1e-12)
 
