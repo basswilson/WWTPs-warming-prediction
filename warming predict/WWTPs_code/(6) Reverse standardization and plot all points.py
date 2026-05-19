@@ -50,9 +50,9 @@ class Neural3network(nn.Module):
 
 class MyDataset(Dataset):
     def __init__(self, col=1):
-        data1 = np.loadtxt('/home/hongchang/Documents/WS-Pytorch/WWTPs_Tem_DIS_(Final)/污水厂数据集/扰动后.csv',
+        data1 = np.loadtxt('/home/hongchang/Documents/WS-Pytorch/WWTPs_Tem_DIS_(Final)/WWTP/扰动后.csv',
                            delimiter=',', skiprows=1,usecols=range(1, 85), dtype=np.float32)
-        data2 = np.loadtxt('/home/hongchang/Documents/WS-Pytorch/WWTPs_Tem_DIS_(Final)/污水厂数据集/genus_725.csv',
+        data2 = np.loadtxt('/home/hongchang/Documents/WS-Pytorch/WWTPs_Tem_DIS_(Final)/WWTP/Sample.csv',
                            delimiter=',', skiprows=1, usecols=col, dtype=np.float32)
 
         self.data2_min = data2.min(axis=0)
@@ -88,25 +88,25 @@ os.chdir(
     '/home/hongchang/Documents/WS-Pytorch/WWTPs_Tem_DIS_(Final)/results/Before Perturbed/alpha/')  # change direction.
 r2_summary = []
 
-# 所有列合并图准备
+
 all_true_values = []
 all_predicted_values = []
 all_col_labels = []
 
-# 准备存储预测丰度表
+
 predicted_abundance_table = None
 true_abundance_table = None
 sample_indices = None
 
-# 主处理循环
-for col in range(1, 1626):  # 你可以根据需要调整列范围
+
+for col in range(1, 1626):  
     print(f'\n{"=" * 40}')
     print(f'Processing column {col}')
 
     col_para = np.ones((0, 91))
     col_test = np.ones((0, 91))
 
-    # 只处理seed0
+
     seed = 0
     try:
         model_path = f'{col}col-4fold-seed{seed}-10000ep-78bS-0.00001lr-0.01wd-drop0_train_network.pth'
@@ -152,19 +152,19 @@ for col in range(1, 1626):  # 你可以根据需要调整列范围
         RI.reshape(1, 84), para_bias]
         col_para = np.r_[col_para, each_para]
 
-        # 收集所有点
+
         all_true_values.extend(y_test_denorm.flatten())
         all_predicted_values.extend(Test_pred_denorm.flatten())
         all_col_labels.extend([col] * test_len)
 
-        # 构建丰度表
-        if predicted_abundance_table is None:
-            # 初始化丰度表
-            predicted_abundance_table = np.zeros((test_len, 1625))  # 725样本 x 1625菌种
-            true_abundance_table = np.zeros((test_len, 1625))
-            sample_indices = indices.numpy().reshape(-1, 1)  # 保存样本indices
 
-        # 将当前菌种的预测结果放入对应列
+        if predicted_abundance_table is None:
+
+            predicted_abundance_table = np.zeros((test_len, 1625))  
+            true_abundance_table = np.zeros((test_len, 1625))
+            sample_indices = indices.numpy().reshape(-1, 1)  
+
+
         predicted_abundance_table[:, col - 1] = Test_pred_denorm.flatten()
         true_abundance_table[:, col - 1] = y_test_denorm.flatten()
 
@@ -189,7 +189,7 @@ for col in range(1, 1626):  # 你可以根据需要调整列范围
         print(f'  ! No valid data for column {col}')
         r2_summary.append({'Column': col, 'R2_Score': np.nan})
 
-# --- 绘制合并后的图 ---
+
 if all_true_values:
     plt.figure(figsize=(10, 7))
     plt.scatter(all_true_values, all_predicted_values, alpha=0.6)
@@ -197,10 +197,10 @@ if all_true_values:
     max_val = max(max(all_true_values), max(all_predicted_values))
     plt.plot([min_val, max_val], [min_val, max_val], 'r--')
 
-    # 计算整体 R²
+
     overall_r2 = r2_score(all_true_values, all_predicted_values)
 
-    # 标注整体 R²
+
     plt.text(0.05, 0.95, f'Overall R² = {overall_r2:.3f}',
              transform=plt.gca().transAxes,
              fontsize=12, fontweight='bold',
@@ -214,7 +214,7 @@ if all_true_values:
     plt.savefig(f'{results_dir}All_Columns_Scatter_with_OverallR2.png', dpi=300)
     plt.close()
 
-    # 保存做图数据为CSV（包含Column_Index）
+
     plot_data_df = pd.DataFrame({
         'Column_Index': all_col_labels,
         'True_Values': all_true_values,
@@ -223,37 +223,37 @@ if all_true_values:
     plot_data_df.to_csv(f'{results_dir}做图数据.csv', index=False)
     print(f'Plotting data saved to: {results_dir}做图数据.csv')
 
-# 保存预测丰度表
+
 if predicted_abundance_table is not None:
-    # 创建DataFrame
+
     predicted_df = pd.DataFrame(predicted_abundance_table)
     true_df = pd.DataFrame(true_abundance_table)
 
-    # 添加样本indices作为第一列
+
     predicted_df.insert(0, 'Sample_Index', sample_indices)
     true_df.insert(0, 'Sample_Index', sample_indices)
 
-    # 保存到CSV
+
     predicted_path = os.path.join(results_dir, 'predicted_abundance_table_seed0.csv')
     true_path = os.path.join(results_dir, 'true_abundance_table_seed0.csv')
 
-    # 使用 pandas 保存，并指定 float_format='%.8f'（8位小数）
+
     pd.DataFrame(predicted_df).to_csv(
         predicted_path,
         index=False,
-        float_format='%.8f'  # 固定小数点格式，避免科学计数法
+        float_format='%.8f'  
     )
 
     pd.DataFrame(true_df).to_csv(
         true_path,
         index=False,
-        float_format='%.8f'  # 固定小数点格式，避免科学计数法
+        float_format='%.8f' 
     )
 
     print(f'\nPredicted abundance table saved to: {predicted_path}')
     print(f'True abundance table saved to: {true_path}')
 
-# 保存R2汇总
+
 r2_summary_df = pd.DataFrame(r2_summary)
 r2_summary_df.to_csv(f'{results_dir}R2_Summary.csv', index=False)
 print(f'R² summary saved to: {results_dir}R2_Summary.csv')
